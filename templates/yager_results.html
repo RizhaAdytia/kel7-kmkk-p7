@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+
+{% block title %}Yager KMKK - Hasil Analisis{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Beranda</a></li>
+                <li class="breadcrumb-item active">Yager KMKK</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<!-- Header -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="text-center">
+            <i class="bi bi-people-fill display-4 text-primary mb-3"></i>
+            <h1 class="fw-bold">Metodologi Ronald R. Yager</h1>
+            <p class="text-muted fs-5">Pengambilan Keputusan Kelompok Multi Kriteria Kualitatif</p>
+        </div>
+    </div>
+</div>
+
+<!-- Hasil Evaluasi Individu -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-person-lines-fill me-2"></i>1. Hasil Evaluasi Individu Tiap Pakar
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% for expert, projects in results.individual_evaluations.items() %}
+                    <div class="col-md-4 mb-3">
+                        <div class="card h-100">
+                            <div class="card-header bg-light">
+                                <h6 class="mb-0">{{ expert }}</h6>
+                            </div>
+                            <div class="card-body">
+                                {% for project_name, score in projects.items() %}
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span>{{ project_name }}</span>
+                                    <span class="badge bg-secondary">{{ results.scale_map[score] }} ({{ score }})</span>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Urutan Pendapat Pakar -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-sort-down me-2"></i>2. Urutan Menurun Pendapat Pakar Tiap Proyek
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% for project, sorted_ratings in results.sorted_opinions.items() %}
+                    <div class="col-md-4 mb-3">
+                        <div class="card h-100">
+                            <div class="card-header bg-light">
+                                <h6 class="mb-0">{{ project }}</h6>
+                            </div>
+                            <div class="card-body">
+                                <p class="mb-2">
+                                    <strong>Kualitatif:</strong> {{ results.sorted_qualitative[project] | join(', ') }}
+                                </p>
+                                <p class="mb-0">
+                                    <strong>Numerik:</strong> {{ sorted_ratings | join(', ') }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Hasil Akhir Agregasi -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0">
+                    <i class="bi bi-graph-up me-2"></i>3. Hasil Akhir Agregasi Keputusan Kelompok
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info mb-3">
+                    <strong>Nilai Q:</strong> {{ results.q_values|join(', ') }}
+                </div>
+                <div class="row">
+                    {% for project, score in results.group_results.items() %}
+                    <div class="col-md-4 mb-3">
+                        <div class="card h-100 {% if project == results.best_project %}border-success{% endif %}">
+                            <div class="card-body text-center">
+                                <h5 class="card-title">{{ project }}</h5>
+                                <h2 class="text-primary mb-2">{{ results.scale_map[score] }}</h2>
+                                <p class="text-muted mb-0">Skor: {{ score }}</p>
+                                {% if project == results.best_project %}
+                                <div class="mt-2">
+                                    <span class="badge bg-success fs-6">
+                                        <i class="bi bi-trophy-fill me-1"></i>TERBAIK
+                                    </span>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Kesimpulan -->
+<div class="row">
+    <div class="col-12">
+        <div class="card border-success">
+            <div class="card-body text-center">
+                <h4 class="text-success mb-3">
+                    <i class="bi bi-check-circle-fill me-2"></i>Kesimpulan
+                </h4>
+                <p class="fs-5 mb-0">
+                    Proyek paling layak dipilih adalah <strong>{{ results.best_project }}</strong> 
+                    dengan nilai <strong>{{ results.scale_map[results.group_results[results.best_project]] }} 
+                    ({{ results.group_results[results.best_project] }})</strong>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

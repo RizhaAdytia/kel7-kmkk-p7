@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+
+{% block title %}Bandingkan Kriteria - {{ project.name }}{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Beranda</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('project_detail', project_id=project.id) }}">{{ project.name }}</a></li>
+                <li class="breadcrumb-item active">Bandingkan Kriteria</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <div class="card p-4 mb-4">
+            <div class="text-center mb-4">
+                <i class="bi bi-arrow-left-right display-4 text-warning mb-3"></i>
+                <h2 class="fw-bold">Perbandingan Kriteria</h2>
+                <p class="text-muted">Untuk proyek: <strong>{{ project.name }}</strong></p>
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle me-2"></i>
+                    Bandingkan setiap pasangan kriteria berdasarkan kepentingan relatifnya.
+                    Pilih nilai yang paling sesuai dengan preferensi Anda.
+                </div>
+            </div>
+
+            <form method="POST" id="comparison-form">
+                <div class="row g-4">
+                    {% for i in range(criteria|length) %}
+                        {% for j in range(i+1, criteria|length) %}
+                        <div class="col-md-6">
+                            <div class="comparison-grid">
+                                <div class="text-center">
+                                    <div class="fw-semibold text-primary mb-2">{{ criteria[i].name }}</div>
+                                    <small class="text-muted">Kriteria {{ i+1 }}</small>
+                                </div>
+
+                                <div class="vs-badge">VS</div>
+
+                                <div class="text-center">
+                                    <div class="fw-semibold text-primary mb-2">{{ criteria[j].name }}</div>
+                                    <small class="text-muted">Kriteria {{ j+1 }}</small>
+                                </div>
+
+                                <div class="mt-3">
+                                    <label class="form-label text-center w-100 fw-semibold">
+                                        Mana yang lebih penting?
+                                    </label>
+                                    <select class="form-select" name="comp_{{ i }}_{{ j }}" required onchange="updateComparison(this)">
+                                        <option value="">Pilih tingkat kepentingan...</option>
+                                        <option value="1" data-desc="Kedua kriteria sama pentingnya">1 - Sama Penting</option>
+                                        <option value="2" data-desc="Sedikit lebih penting">2 - Sedikit Lebih Penting</option>
+                                        <option value="3" data-desc="Lebih penting secara moderat">3 - Moderat Lebih Penting</option>
+                                        <option value="4" data-desc="Lebih penting">4 - Lebih Penting</option>
+                                        <option value="5" data-desc="Jauh lebih penting">5 - Sangat Lebih Penting</option>
+                                        <option value="6" data-desc="Sangat lebih penting">6 - Sangat Lebih Penting</option>
+                                        <option value="7" data-desc="Jauh lebih penting">7 - Jauh Lebih Penting</option>
+                                        <option value="8" data-desc="Mutlak lebih penting">8 - Mutlak Lebih Penting</option>
+                                        <option value="9" data-desc="Ekstrem lebih penting">9 - Ekstrem Lebih Penting</option>
+                                        <option value="0.5" data-desc="Sedikit kurang penting">1/2 - Sedikit Kurang Penting</option>
+                                        <option value="0.333" data-desc="Moderately kurang penting">1/3 - Moderat Kurang Penting</option>
+                                        <option value="0.25" data-desc="Kurang penting">1/4 - Kurang Penting</option>
+                                        <option value="0.2" data-desc="Jauh kurang penting">1/5 - Sangat Kurang Penting</option>
+                                        <option value="0.167" data-desc="Sangat kurang penting">1/6 - Sangat Kurang Penting</option>
+                                        <option value="0.143" data-desc="Jauh kurang penting">1/7 - Jauh Kurang Penting</option>
+                                        <option value="0.125" data-desc="Mutlak kurang penting">1/8 - Mutlak Kurang Penting</option>
+                                        <option value="0.111" data-desc="Ekstrem kurang penting">1/9 - Ekstrem Kurang Penting</option>
+                                    </select>
+                                    <div class="form-text text-center" id="desc_comp_{{ i }}_{{ j }}"></div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% endfor %}
+                </div>
+
+                <div class="text-center mt-5">
+                    <div class="d-grid gap-3 d-md-flex justify-content-md-center">
+                        <button type="submit" class="btn btn-success btn-lg px-5">
+                            <i class="bi bi-check-circle me-2"></i>Simpan Perbandingan
+                        </button>
+                        <a href="{{ url_for('project_detail', project_id=project.id) }}" class="btn btn-outline-secondary btn-lg px-4">
+                            <i class="bi bi-arrow-left me-1"></i>Kembali
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="card p-3 bg-light">
+            <h6 class="text-muted mb-2">
+                <i class="bi bi-lightbulb me-1"></i>Panduan Perbandingan
+            </h6>
+            <div class="row">
+                <div class="col-md-6">
+                    <small class="text-muted">
+                        <strong>Nilai 1:</strong> Kedua kriteria sama pentingnya<br>
+                        <strong>Nilai 3:</strong> Salah satu sedikit lebih penting<br>
+                        <strong>Nilai 5:</strong> Salah satu jelas lebih penting<br>
+                        <strong>Nilai 7:</strong> Salah satu sangat lebih penting<br>
+                        <strong>Nilai 9:</strong> Salah satu mutlak lebih penting
+                    </small>
+                </div>
+                <div class="col-md-6">
+                    <small class="text-muted">
+                        <strong>Konsistensi:</strong> Pastikan perbandingan Anda konsisten<br>
+                        <strong>Contoh:</strong> Jika A=3xB dan B=2xC, maka A=6xC<br>
+                        <strong>Tips:</strong> Gunakan nilai pecahan untuk kebalikannya
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function updateComparison(select) {
+    const descId = select.name.replace('comp_', 'desc_comp_');
+    const descElement = document.getElementById(descId);
+    const selectedOption = select.options[select.selectedIndex];
+
+    if (selectedOption.value) {
+        descElement.textContent = selectedOption.getAttribute('data-desc');
+        descElement.style.color = 'var(--accent-color)';
+    } else {
+        descElement.textContent = '';
+    }
+}
+
+// Add smooth animations
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('comparison-form');
+    form.addEventListener('submit', function(e) {
+        const submitBtn = form.querySelector('button[type="submit"]');
+        submitBtn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Menyimpan...';
+        submitBtn.disabled = true;
+    });
+
+    // Add fade-in animation to comparison grids
+    const grids = document.querySelectorAll('.comparison-grid');
+    grids.forEach((grid, index) => {
+        grid.style.animationDelay = `${index * 0.1}s`;
+        grid.classList.add('fade-in');
+    });
+});
+</script>
+{% endblock %}

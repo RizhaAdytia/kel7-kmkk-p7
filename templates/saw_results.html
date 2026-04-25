@@ -1,0 +1,256 @@
+{% extends "base.html" %}
+
+{% block title %}SAW - Hasil Analisis{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Beranda</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('project_detail', project_id=project.id) }}">{{ project.name }}</a></li>
+                <li class="breadcrumb-item active">SAW - Hasil</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<!-- Header -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="text-center">
+            <i class="bi bi-bar-chart-line-fill display-4 text-info mb-3"></i>
+            <h1 class="fw-bold">Hasil SAW (Simple Additive Weighting)</h1>
+            <p class="text-muted fs-5">Proyek: <strong>{{ project.name }}</strong></p>
+        </div>
+    </div>
+</div>
+
+<!-- Ranking Hasil -->
+<div class="row mb-4">
+    <div class="col-lg-8 mx-auto">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-trophy me-2"></i>Ranking Alternatif
+                </h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="list-group list-group-flush">
+                    {% for result in results %}
+                    <div class="list-group-item">
+                        <div class="row align-items-center">
+                            <div class="col-auto">
+                                {% if result.rank == 1 %}
+                                <span class="badge bg-success-subtle text-success fs-6 p-2">
+                                    <i class="bi bi-1-circle-fill"></i> TERBAIK
+                                </span>
+                                {% elif result.rank == 2 %}
+                                <span class="badge bg-info-subtle text-info fs-6 p-2">
+                                    <i class="bi bi-2-circle-fill"></i> KEDUA
+                                </span>
+                                {% elif result.rank == 3 %}
+                                <span class="badge bg-warning-subtle text-warning fs-6 p-2">
+                                    <i class="bi bi-3-circle-fill"></i> KETIGA
+                                </span>
+                                {% else %}
+                                <span class="badge bg-secondary-subtle text-secondary fs-6 p-2">
+                                    {{ result.rank }}
+                                </span>
+                                {% endif %}
+                            </div>
+                            <div class="col">
+                                <strong>{{ result.name }}</strong>
+                            </div>
+                            <div class="col-auto">
+                                <div class="progress" style="width: 200px; height: 24px;">
+                                    <div class="progress-bar bg-info" role="progressbar" 
+                                         style="width: {{ result.score * 100 }}%;" 
+                                         aria-valuenow="{{ result.score }}" 
+                                         aria-valuemin="0" aria-valuemax="1">
+                                        <strong style="font-size: 12px;">{{ "%.4f"|format(result.score) }}</strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bobot Kriteria -->
+<div class="row mb-4">
+    <div class="col-lg-8 mx-auto">
+        <div class="card">
+            <div class="card-header bg-light">
+                <h6 class="mb-0">
+                    <i class="bi bi-sliders me-2"></i>Konfigurasi Kriteria
+                </h6>
+            </div>
+            <div class="card-body">
+                <table class="table table-sm table-borderless">
+                    <thead>
+                        <tr>
+                            <th>Kriteria</th>
+                            <th>Tipe</th>
+                            <th>Bobot (w)</th>
+                            <th>Bobot Normal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for config in criterion_configs %}
+                        <tr>
+                            <td><strong>{{ config.criterion.name }}</strong></td>
+                            <td>
+                                {% if config.is_benefit %}
+                                <span class="badge bg-success">Benefit (↑)</span>
+                                {% else %}
+                                <span class="badge bg-danger">Cost (↓)</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ "%.2f"|format(config.weight) }}</td>
+                            <td><strong>{{ "%.4f"|format(config.weight / 10) }}</strong></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Matriks Normalisasi -->
+<div class="row mb-4">
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-header bg-light">
+                <h6 class="mb-0">
+                    <i class="bi bi-table me-2"></i>Matriks Ternormalisasi (R)
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width: 15%">Alternatif</th>
+                                {% for config in criterion_configs %}
+                                <th>{{ config.criterion.name }}</th>
+                                {% endfor %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for alt in alternatives %}
+                            <tr>
+                                <td><strong>{{ alt.name }}</strong></td>
+                                {% for col in normalized_matrix[loop.index0] %}
+                                <td>{{ "%.4f"|format(col) }}</td>
+                                {% endfor %}
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Matriks Terbobot -->
+<div class="row mb-4">
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-header bg-light">
+                <h6 class="mb-0">
+                    <i class="bi bi-table me-2"></i>Matriks Terbobot (V = R × w)
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width: 15%">Alternatif</th>
+                                {% for config in criterion_configs %}
+                                <th>{{ config.criterion.name }}</th>
+                                {% endfor %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for alt in alternatives %}
+                            <tr>
+                                <td><strong>{{ alt.name }}</strong></td>
+                                {% for col in weighted_matrix[loop.index0] %}
+                                <td>{{ "%.6f"|format(col) }}</td>
+                                {% endfor %}
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Skor Akhir -->
+<div class="row mb-4">
+    <div class="col-lg-8 mx-auto">
+        <div class="card">
+            <div class="card-header bg-light">
+                <h6 class="mb-0">
+                    <i class="bi bi-calculator me-2"></i>Skor Akhir (Σ V)
+                </h6>
+            </div>
+            <div class="card-body">
+                <table class="table table-borderless">
+                    <thead>
+                        <tr>
+                            <th>Alternatif</th>
+                            <th>Skor Akhir</th>
+                            <th>Presentase</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for alt in alternatives %}
+                        <tr>
+                            <td><strong>{{ alt.name }}</strong></td>
+                            <td><strong class="text-info">{{ "%.6f"|format(final_scores[loop.index0]) }}</strong></td>
+                            <td>{{ "%.2f"|format(final_scores[loop.index0] * 100) }}%</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Navigasi -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="d-flex gap-2 justify-content-between flex-wrap">
+            <div class="d-flex gap-2 flex-wrap">
+                <a href="{{ url_for('project_detail', project_id=project.id) }}" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left me-1"></i>Kembali ke Proyek
+                </a>
+                <button onclick="window.print()" class="btn btn-outline-info">
+                    <i class="bi bi-printer me-1"></i>Cetak Hasil
+                </button>
+            </div>
+            <div class="d-flex gap-2 flex-wrap">
+                <a href="{{ url_for('promethee_input', project_id=project.id) }}" class="btn btn-warning">
+                    <i class="bi bi-arrow-right me-1"></i>Coba PROMETHEE II
+                </a>
+                <a href="{{ url_for('method_comparison', project_id=project.id) }}" class="btn btn-primary">
+                    <i class="bi bi-bar-chart me-1"></i>Bandingkan SAW vs PROMETHEE
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

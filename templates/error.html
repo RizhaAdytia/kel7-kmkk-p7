@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %}Error{% endblock %}
+
+{% block content %}
+<div class="text-center py-5">
+    <div class="alert alert-danger mx-auto" style="max-width: 720px;">
+        <h3 class="mb-3">Terjadi Kesalahan</h3>
+        <p class="mb-4">{{ message }}</p>
+        <a href="javascript:history.back()" class="btn btn-secondary">
+            <i class="bi bi-arrow-left-circle me-2"></i>Kembali
+        </a>
+    </div>
+</div>
+{% endblock %}

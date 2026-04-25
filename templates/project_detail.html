@@ -1,0 +1,232 @@
+{% extends "base.html" %}
+
+{% block title %}{{ project.name }} - Detail Proyek{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Beranda</a></li>
+                <li class="breadcrumb-item active">{{ project.name }}</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="fw-bold mb-1">
+                    <i class="bi bi-folder me-2 text-primary"></i>{{ project.name }}
+                </h1>
+                <p class="text-muted mb-0">Kelola kriteria, alternatif, dan analisis proyek Anda</p>
+            </div>
+            <div class="text-end">
+                <div class="d-flex gap-2">
+                    <div class="badge bg-primary fs-6 px-3 py-2">
+                        <i class="bi bi-check-circle me-1"></i>{{ project.criteria|length }} Kriteria
+                    </div>
+                    <div class="badge bg-info fs-6 px-3 py-2">
+                        <i class="bi bi-diagram-3 me-1"></i>{{ project.alternatives|length }} Alternatif
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Kriteria Section -->
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="bi bi-list-check me-2"></i>Kriteria Penilaian
+                </h5>
+                <a href="{{ url_for('add_criteria', project_id=project.id) }}" class="btn btn-light btn-sm">
+                    <i class="bi bi-plus-circle me-1"></i>Tambah
+                </a>
+            </div>
+            <div class="card-body">
+                {% if project.criteria %}
+                <div class="list-group list-group-flush">
+                    {% for criterion in project.criteria %}
+                    <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-check-circle text-success me-3"></i>
+                            <div>
+                                <strong>{{ criterion.name }}</strong>
+                                {% if project.alternatives %}
+                                <br>
+                                <small class="text-muted">
+                                    <a href="{{ url_for('compare_alternatives', project_id=project.id, criterion_id=criterion.id) }}"
+                                       class="text-decoration-none">
+                                        <i class="bi bi-arrow-left-right me-1"></i>Bandingkan Alternatif
+                                    </a>
+                                </small>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <span class="badge bg-light text-dark">{{ loop.index }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-4">
+                    <i class="bi bi-list-check display-4 text-muted mb-3"></i>
+                    <h6 class="text-muted">Belum ada kriteria</h6>
+                    <p class="text-muted small mb-3">Tambahkan kriteria penilaian untuk proyek ini</p>
+                    <a href="{{ url_for('add_criteria', project_id=project.id) }}" class="btn btn-primary">
+                        <i class="bi bi-plus-circle me-1"></i>Tambah Kriteria
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Alternatif Section -->
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="bi bi-diagram-3 me-2"></i>Alternatif Pilihan
+                </h5>
+                <a href="{{ url_for('add_alternatives', project_id=project.id) }}" class="btn btn-light btn-sm">
+                    <i class="bi bi-plus-circle me-1"></i>Tambah
+                </a>
+            </div>
+            <div class="card-body">
+                {% if project.alternatives %}
+                <div class="list-group list-group-flush">
+                    {% for alternative in project.alternatives %}
+                    <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-circle text-info me-3"></i>
+                            <strong>{{ alternative.name }}</strong>
+                        </div>
+                        <span class="badge bg-light text-dark">{{ loop.index }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-4">
+                    <i class="bi bi-diagram-3 display-4 text-muted mb-3"></i>
+                    <h6 class="text-muted">Belum ada alternatif</h6>
+                    <p class="text-muted small mb-3">Tambahkan alternatif pilihan untuk proyek ini</p>
+                    <a href="{{ url_for('add_alternatives', project_id=project.id) }}" class="btn btn-info">
+                        <i class="bi bi-plus-circle me-1"></i>Tambah Alternatif
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Action Buttons -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title mb-3">
+                    <i class="bi bi-gear me-2"></i>Langkah Selanjutnya
+                </h5>
+
+                <div class="step-indicator mb-4">
+                    <div class="step completed">
+                        <i class="bi bi-check"></i>
+                    </div>
+                    <div class="step {{ 'completed' if project.criteria else 'active' }}">
+                        {% if project.criteria %}
+                        <i class="bi bi-check"></i>
+                        {% else %}2{% endif %}
+                    </div>
+                    <div class="step {{ 'completed' if project.alternatives else '' }}">
+                        {% if project.alternatives %}
+                        <i class="bi bi-check"></i>
+                        {% else %}3{% endif %}
+                    </div>
+                    <div class="step">4</div>
+                </div>
+
+                <div class="row g-3">
+                    {% if not project.criteria %}
+                    <div class="col-md-6 col-lg-3">
+                        <a href="{{ url_for('add_criteria', project_id=project.id) }}" class="btn btn-primary w-100">
+                            <i class="bi bi-plus-circle me-2"></i>Tambah Kriteria
+                        </a>
+                    </div>
+                    {% endif %}
+
+                    {% if not project.alternatives %}
+                    <div class="col-md-6 col-lg-3">
+                        <a href="{{ url_for('add_alternatives', project_id=project.id) }}" class="btn btn-info w-100">
+                            <i class="bi bi-plus-circle me-2"></i>Tambah Alternatif
+                        </a>
+                    </div>
+                    {% endif %}
+
+                    {% if project.criteria %}
+                    <div class="col-md-6 col-lg-3">
+                        <a href="{{ url_for('compare_criteria', project_id=project.id) }}" class="btn btn-warning w-100">
+                            <i class="bi bi-arrow-left-right me-2"></i>Bandingkan Kriteria
+                        </a>
+                    </div>
+                    {% endif %}
+
+                    {% if project.criteria and project.alternatives %}
+                    <div class="col-md-6 col-lg-3">
+                        <a href="{{ url_for('results', project_id=project.id) }}" class="btn btn-success w-100">
+                            <i class="bi bi-bar-chart-line me-2"></i>Hasil AHP
+                        </a>
+                    </div>
+                    <div class="col-md-6 col-lg-3">
+                        <a href="{{ url_for('hybrid_input', project_id=project.id) }}" class="btn btn-success w-100" style="background: linear-gradient(135deg, #16a34a, #15803d); border: none;">
+                            <i class="bi bi-bezier2 me-2"></i>Model Hybrid
+                        </a>
+                    </div>
+                    <div class="col-md-6 col-lg-3">
+                        <a href="{{ url_for('mpe_results', project_id=project.id) }}" class="btn btn-primary w-100">
+                            <i class="bi bi-activity me-2"></i>Hasil MPE
+                        </a>
+                    </div>
+                    <div class="col-md-6 col-lg-3">
+                        <a href="{{ url_for('bayes_results', project_id=project.id) }}" class="btn btn-info w-100 text-white">
+                            <i class="bi bi-calculator me-2"></i>Hasil Bayes
+                        </a>
+                    </div>
+                    <div class="col-md-6 col-lg-3">
+                        <a href="{{ url_for('cpi_results', project_id=project.id) }}" class="btn btn-warning w-100 text-white">
+                            <i class="bi bi-bar-chart-fill me-2"></i>Hasil CPI
+                        </a>
+                    </div>
+                    <div class="col-md-6 col-lg-3">
+                        <a href="{{ url_for('saw_input', project_id=project.id) }}" class="btn btn-primary w-100" style="background: linear-gradient(135deg, #06b6d4, #0891b2); border: none;">
+                            <i class="bi bi-arrow-down-up me-2"></i>SAW
+                        </a>
+                    </div>
+                    <div class="col-md-6 col-lg-3">
+                        <a href="{{ url_for('promethee_input', project_id=project.id) }}" class="btn btn-warning w-100 text-white">
+                            <i class="bi bi-diagram-2 me-2"></i>PROMETHEE II
+                        </a>
+                    </div>
+                    <div class="col-md-6 col-lg-3">
+                        <a href="{{ url_for('yager_input', project_id=project.id) }}" class="btn btn-primary w-100" style="background: linear-gradient(135deg, #7c3aed, #6d28d9); border: none;">
+                            <i class="bi bi-people-fill me-2"></i>Yager KMKK
+                        </a>
+                    </div>
+                    <div class="col-md-6 col-lg-3">
+                        <a href="{{ url_for('method_comparison', project_id=project.id) }}" class="btn btn-dark w-100">
+                            <i class="bi bi-columns-gap me-2"></i>Perbandingan
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

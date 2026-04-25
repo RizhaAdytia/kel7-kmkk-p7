@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+
+{% block title %}Beranda - Decision Support System Group 7{% endblock %}
+
+{% block content %}
+<div class="hero-section">
+    <div class="container">
+        <h1 class="display-4 fw-bold">Sistem Penunjang Keputusan Kelompok 7</h1>
+        <p class="lead">Decision Support System untuk pengambilan keputusan yang lebih baik dan terstruktur</p>
+        <a href="{{ url_for('create_project') }}" class="btn btn-light btn-lg mt-3 px-4 py-3">
+            <i class="bi bi-plus-circle me-2"></i>Mulai Proyek Baru
+        </a>
+    </div>
+</div>
+
+<div class="row g-4 mb-5">
+    <div class="col-md-4">
+        <div class="feature-card h-100">
+            <i class="bi bi-list-check"></i>
+            <h5>Kriteria & Alternatif</h5>
+            <p>Tambahkan kriteria, alternatif, dan atur proyek dengan mudah untuk analisis keputusan yang lengkap</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="feature-card h-100">
+            <i class="bi bi-arrow-left-right"></i>
+            <h5>Perbandingan Berpasangan</h5>
+            <p>Lakukan evaluasi pairwise kriteria dan alternatif untuk menghasilkan bobot yang akurat</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="feature-card h-100">
+            <i class="bi bi-bar-chart-line"></i>
+            <h5>SAW, PROMETHEE & AHP</h5>
+            <p>Bandingkan hasil AHP dengan SAW dan PROMETHEE II untuk pilihan terbaik dan validasi keputusan</p>
+        </div>
+    </div>
+</div>
+
+{% if projects %}
+<div class="card p-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="mb-0">
+            <i class="bi bi-folder me-2"></i>Daftar Proyek
+        </h3>
+        <span class="badge bg-primary fs-6">{{ projects|length }} Proyek</span>
+    </div>
+
+    <div class="row g-3">
+        {% for project in projects %}
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title text-truncate">
+                        <i class="bi bi-folder2 me-2 text-primary"></i>{{ project.name }}
+                    </h5>
+                    <div class="mt-auto">
+                        <div class="d-flex justify-content-between text-muted small mb-2">
+                            <span><i class="bi bi-check-circle me-1"></i>{{ project.criteria|length }} Kriteria</span>
+                            <span><i class="bi bi-diagram-3 me-1"></i>{{ project.alternatives|length }} Alternatif</span>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <a href="{{ url_for('project_detail', project_id=project.id) }}" class="btn btn-primary flex-fill">
+                                <i class="bi bi-eye me-1"></i>Lihat Detail
+                            </a>
+                            <form method="POST" action="{{ url_for('delete_project', project_id=project.id) }}" class="d-inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus proyek ini?')">
+                                <button type="submit" class="btn btn-danger">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% else %}
+<div class="text-center py-5">
+    <div class="mb-4">
+        <i class="bi bi-folder-x display-1 text-muted"></i>
+    </div>
+    <h4 class="text-muted">Belum ada proyek</h4>
+    <p class="text-muted mb-4">Mulai dengan membuat proyek pertama Anda</p>
+    <a href="{{ url_for('create_project') }}" class="btn btn-primary btn-lg">
+        <i class="bi bi-plus-circle me-2"></i>Buat Proyek Pertama
+    </a>
+</div>
+{% endif %}
+
+<!-- About Us Section -->
+<div class="mt-5">
+    <div class="text-center mb-5">
+        <h2 class="display-5 fw-bold">Tentang Kami</h2>
+        <p class="lead text-muted">Tim pengembang Sistem Penunjang Keputusan Kelompok 7</p>
+    </div>
+
+    <div class="row g-4 justify-content-center">
+        <!-- Person 1 -->
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm text-center">
+                <div class="card-body">
+                    <img src="/static/images/davfa.jpg" class="rounded-circle mb-3" alt="Foto Anggota 1" style="width: 150px; height: 150px; object-fit: cover;">
+                    <h5 class="card-title">Muhammad Dava Kayla Kalam Perdana</h5>
+                    <p class="text-muted mb-2">065123002</p>
+                    <a href="https://www.instagram.com/dvaakyla_?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" target="_blank" class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-instagram me-1"></i>@dvaakyla_
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Person 2 -->
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm text-center">
+                <div class="card-body">
+                    <img src="/static/images/rizha.jpg" class="rounded-circle mb-3" alt="Foto Anggota 2" style="width: 150px; height: 150px; object-fit: cover;">
+                    <h5 class="card-title">Rizha Adytia</h5>
+                    <p class="text-muted mb-2">065123004</p>
+                    <a href="https://www.instagram.com/rizhaady._/?utm_source=ig_web_button_share_sheet" target="_blank" class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-instagram me-1"></i>@rizhaady._
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Person 3 -->
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm text-center">
+                <div class="card-body">
+                    <img src="/static/images/bagas.jpg" class="rounded-circle mb-3" alt="Foto Anggota 3" style="width: 150px; height: 150px; object-fit: cover;">
+                    <h5 class="card-title">Bagas Arya Putra Sofyan</h5>
+                    <p class="text-muted mb-2">065123014</p>
+                    <a href="https://www.instagram.com/bagassssar/?utm_source=ig_web_button_share_sheet" target="_blank" class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-instagram me-1"></i>@bagassssar
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,193 @@
+{% extends "base.html" %}
+
+{% block title %}Yager KMKK - Input Data{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Beranda</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('project_detail', project_id=project.id) }}">{{ project.name }}</a></li>
+                <li class="breadcrumb-item active">Yager KMKK - Input</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="text-center">
+            <i class="bi bi-people-fill display-4 text-primary mb-3"></i>
+            <h1 class="fw-bold">Yager KMKK - Input Data</h1>
+            <p class="text-muted fs-5">Metodologi Ronald R. Yager untuk Pengambilan Keputusan Kelompok Multi Kriteria Kualitatif</p>
+        </div>
+    </div>
+</div>
+
+<!-- Info Box -->
+<div class="row mb-4">
+    <div class="col-lg-10 mx-auto">
+        <div class="alert alert-info border-0">
+            <h6 class="alert-heading mb-2">
+                <i class="bi bi-info-circle me-2"></i>Panduan Input Yager KMKK
+            </h6>
+            <hr class="my-2">
+            <ul class="mb-0 small">
+                <li><strong>Skala Kualitatif:</strong> 7=S (Sempurna), 6=SB (Sangat Baik), 5=B (Baik), 4=Sd (Sedang), 3=K (Kurang), 2=SK (Sangat Kurang), 1=BS (Buruk Sekali)</li>
+                <li><strong>Bobot Kriteria:</strong> Penilaian bobot kepentingan kriteria dalam skala 1-7</li>
+                <li><strong>Jumlah Pakar:</strong> Minimal 2 pakar, default 3 pakar</li>
+                <li><strong>Penilaian Pakar:</strong> Setiap pakar memberikan penilaian untuk setiap alternatif pada setiap kriteria</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- Form Input -->
+<form method="POST" class="card p-4">
+    <!-- Jumlah Pakar -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <label for="num_experts" class="form-label fw-bold">
+                <i class="bi bi-person-lines-fill me-2"></i>Jumlah Pakar
+            </label>
+            <input type="number" id="num_experts" name="num_experts"
+                   value="{{ saved_num_experts }}" min="2" max="10"
+                   class="form-control" required>
+            <div class="form-text">Jumlah pakar/ahli yang akan memberikan penilaian (minimal 2)</div>
+        </div>
+    </div>
+
+    <!-- Bobot Kriteria -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h5 class="mb-3">
+                <i class="bi bi-sliders me-2"></i>Bobot Kriteria
+            </h5>
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <thead class="table-primary">
+                        <tr>
+                            <th width="30%">Kriteria</th>
+                            <th width="40%">Bobot Kepentingan</th>
+                            <th width="30%">Nilai</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for criterion in criteria %}
+                        <tr>
+                            <td>
+                                <strong>{{ criterion.name }}</strong>
+                            </td>
+                            <td>
+                                <select name="weight_{{ criterion.id }}" class="form-select" required>
+                                    {% for option in scale_options %}
+                                    <option value="{{ option.value }}"
+                                            {% if saved_criteria_weights.get(criterion.id, 4) == option.value %}selected{% endif %}>
+                                        {{ option.label }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </td>
+                            <td>
+                                <span class="badge bg-secondary">{{ saved_criteria_weights.get(criterion.id, 4) }}</span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Penilaian Pakar -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h5 class="mb-3">
+                <i class="bi bi-clipboard-data me-2"></i>Penilaian Pakar
+            </h5>
+            <div class="alert alert-warning">
+                <i class="bi bi-exclamation-triangle me-2"></i>
+                <strong>Penting:</strong> Setiap pakar harus memberikan penilaian untuk semua alternatif pada semua kriteria.
+            </div>
+
+            <!-- Loop untuk setiap pakar -->
+            {% for i in range(1, saved_num_experts + 1) %}
+            <div class="card mb-4">
+                <div class="card-header bg-light">
+                    <h6 class="mb-0">
+                        <i class="bi bi-person-circle me-2"></i>Pakar {{ i }} (PK{{ i }})
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Alternatif</th>
+                                    {% for criterion in criteria %}
+                                    <th>{{ criterion.name }}</th>
+                                    {% endfor %}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for alternative in alternatives %}
+                                <tr>
+                                    <td><strong>{{ alternative.name }}</strong></td>
+                                    {% for criterion in criteria %}
+                                    <td>
+                                        <select name="rating_PK{{ i }}_{{ alternative.id }}_{{ criterion.id }}"
+                                                class="form-select form-select-sm" required>
+                                            {% for option in scale_options %}
+                                            <option value="{{ option.value }}"
+                                                    {% set saved_rating = saved_expert_ratings.get('PK' + i|string, {}).get(alternative.id, {}).get(criterion.id, 4) %}
+                                                    {% if saved_rating == option.value %}selected{% endif %}>
+                                                {{ option.label }}
+                                            </option>
+                                            {% endfor %}
+                                        </select>
+                                    </td>
+                                    {% endfor %}
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Submit Buttons -->
+    <div class="d-flex gap-2 mt-4">
+        <a href="{{ url_for('project_detail', project_id=project.id) }}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left me-1"></i>Kembali
+        </a>
+        <button type="submit" class="btn btn-primary ms-auto">
+            <i class="bi bi-play-fill me-1"></i>Jalankan Analisis Yager KMKK
+        </button>
+    </div>
+</form>
+
+<script>
+// Auto-update jumlah pakar ketika input berubah
+document.getElementById('num_experts').addEventListener('change', function() {
+    // Reload halaman dengan parameter baru
+    const newNum = this.value;
+    const url = new URL(window.location);
+    url.searchParams.set('experts', newNum);
+    window.location.href = url.toString();
+});
+
+// Update nilai badge ketika select berubah
+document.querySelectorAll('select[name^="weight_"]').forEach(select => {
+    select.addEventListener('change', function() {
+        const row = this.closest('tr');
+        const badge = row.querySelector('.badge');
+        badge.textContent = this.value;
+    });
+});
+</script>
+
+{% endblock %}

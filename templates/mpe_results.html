@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Hasil Metode Perbandingan Eksponensial (MPE)</h2>
+    <p><a href="{{ url_for('project_detail', project_id=project.id) }}" class="btn btn-secondary">Kembali</a></p>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h4>MPE Dasar (Exponential Weighted Sum)</h4>
+                </div>
+                <div class="card-body">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Ranking</th>
+                                <th>Alternatif</th>
+                                <th>Skor</th>
+                                <th>Persentase</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for result in results_basic %}
+                            <tr>
+                                <td><strong>{{ loop.index }}</strong></td>
+                                <td>{{ result.name }}</td>
+                                <td><strong>{{ "%.6f"|format(result.score) }}</strong></td>
+                                <td>{{ "%.2f"|format(result.score * 100) }}%</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h4>MPE Lanjut (Power Exponential)</h4>
+                </div>
+                <div class="card-body">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Ranking</th>
+                                <th>Alternatif</th>
+                                <th>Skor</th>
+                                <th>Persentase</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for result in results_advanced %}
+                            <tr>
+                                <td><strong>{{ loop.index }}</strong></td>
+                                <td>{{ result.name }}</td>
+                                <td><strong>{{ "%.6f"|format(result.score) }}</strong></td>
+                                <td>{{ "%.2f"|format(result.score * 100) }}%</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mt-4">
+        <div class="card-header">
+            <h5>Penjelasan Metode</h5>
+        </div>
+        <div class="card-body">
+            <h6>MPE Dasar (Exponential Weighted Sum)</h6>
+            <p>Formula: <code>Score = Σ(nilai_alternatif × e^bobot_kriteria)</code></p>
+            <p>Metode ini menggunakan fungsi eksponensial untuk memberikan penekanan yang lebih besar pada bobot kriteria.</p>
+
+            <h6 class="mt-3">MPE Lanjut (Power Exponential)</h6>
+            <p>Formula: <code>Score = ∏(nilai_alternatif^bobot_kriteria)</code></p>
+            <p>Metode ini menggunakan geometric mean dengan power exponential, lebih sensitif terhadap nilai yang rendah.</p>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-12 text-center">
+            <button onclick="window.print()" class="btn btn-outline-info">
+                <i class="bi bi-printer me-1"></i>Cetak Hasil MPE
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}

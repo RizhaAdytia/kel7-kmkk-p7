@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+
+{% block title %}Tambah Kriteria - {{ project.name }}{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Beranda</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('project_detail', project_id=project.id) }}">{{ project.name }}</a></li>
+                <li class="breadcrumb-item active">Tambah Kriteria</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card p-4">
+            <div class="text-center mb-4">
+                <i class="bi bi-list-check display-4 text-primary mb-3"></i>
+                <h2 class="fw-bold">Tambah Kriteria</h2>
+                <p class="text-muted">Untuk proyek: <strong>{{ project.name }}</strong></p>
+            </div>
+
+            <form method="POST" id="criteria-form">
+                <div id="criteria-container">
+                    <div class="criteria-item mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <label class="form-label fw-semibold mb-0">
+                                <i class="bi bi-1-circle me-1"></i>Kriteria 1
+                            </label>
+                            <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeCriteria(this)">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                        <input type="text"
+                               class="form-control"
+                               name="criteria"
+                               placeholder="Contoh: Harga, Kualitas, Waktu Pengiriman"
+                               required
+                               maxlength="100">
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2 mb-4">
+                    <button type="button" onclick="addCriteria()" class="btn btn-outline-primary">
+                        <i class="bi bi-plus-circle me-1"></i>Tambah Kriteria Lain
+                    </button>
+                </div>
+
+                <div class="d-grid gap-3">
+                    <button type="submit" class="btn btn-success btn-lg">
+                        <i class="bi bi-check-circle me-2"></i>Simpan Kriteria
+                    </button>
+                    <a href="{{ url_for('project_detail', project_id=project.id) }}" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left me-1"></i>Kembali ke Detail Proyek
+                    </a>
+                </div>
+            </form>
+        </div>
+
+        <div class="card mt-4 p-3 bg-light">
+            <h6 class="text-muted mb-2">
+                <i class="bi bi-info-circle me-1"></i>Tips untuk Kriteria yang Baik
+            </h6>
+            <ul class="text-muted small mb-0">
+                <li>Kriteria harus saling independen dan tidak tumpang tindih</li>
+                <li>Gunakan bahasa yang jelas dan spesifik</li>
+                <li>Pastikan kriteria dapat diukur atau dibandingkan</li>
+                <li>Batasi jumlah kriteria maksimal 7-9 untuk konsistensi</li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+let criteriaCount = 1;
+
+function addCriteria() {
+    criteriaCount++;
+    const container = document.getElementById('criteria-container');
+    const div = document.createElement('div');
+    div.className = 'criteria-item mb-3';
+    div.innerHTML = `
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <label class="form-label fw-semibold mb-0">
+                <i class="bi bi-${criteriaCount}-circle me-1"></i>Kriteria ${criteriaCount}
+            </label>
+            <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeCriteria(this)">
+                <i class="bi bi-trash"></i>
+            </button>
+        </div>
+        <input type="text"
+               class="form-control"
+               name="criteria"
+               placeholder="Masukkan nama kriteria"
+               required
+               maxlength="100">
+    `;
+    container.appendChild(div);
+
+    // Update icon numbers
+    updateCriteriaNumbers();
+}
+
+function removeCriteria(button) {
+    if (criteriaCount > 1) {
+        button.closest('.criteria-item').remove();
+        criteriaCount--;
+        updateCriteriaNumbers();
+    }
+}
+
+function updateCriteriaNumbers() {
+    const items = document.querySelectorAll('.criteria-item');
+    items.forEach((item, index) => {
+        const label = item.querySelector('.form-label');
+        const icon = item.querySelector('i');
+        const number = index + 1;
+        label.innerHTML = `<i class="bi bi-${number}-circle me-1"></i>Kriteria ${number}`;
+    });
+}
+
+// Add smooth animations
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('criteria-form');
+    form.addEventListener('submit', function(e) {
+        const submitBtn = form.querySelector('button[type="submit"]');
+        submitBtn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Menyimpan...';
+        submitBtn.disabled = true;
+    });
+});
+</script>
+{% endblock %}
