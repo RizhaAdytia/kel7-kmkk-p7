@@ -987,15 +987,18 @@ class YagerMethod:
         Returns:
             nilai evaluasi individu (1-7)
         """
-        min_values = []
+        max_values = []
         
         for criterion, weight in criteria_weights.items():
             neg_weight = YagerMethod.neg(weight)
-            rating = expert_ratings[criterion]
+            rating = expert_ratings.get(criterion, 4)  # Gunakan .get untuk keamanan
             max_val = YagerMethod.max_val(neg_weight, rating)
-            min_values.append(max_val)
+            max_values.append(max_val)
         
-        return YagerMethod.min_val(min_values[0], YagerMethod.min_val(min_values[1], min_values[2]))
+        if not max_values:
+            return 4  # Default ke 'Sedang' jika tidak ada nilai
+
+        return min(max_values)
     
     @staticmethod
     def calculate_aggregation_thresholds(r=3, q=7):

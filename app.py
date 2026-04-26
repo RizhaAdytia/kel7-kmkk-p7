@@ -1093,7 +1093,8 @@ def yager_results(project_id):
     # Konversi data untuk YagerMethod
     criteria_weights = {}
     for crit in criteria:
-        criteria_weights[crit.name] = yager_data['criteria_weights'].get(crit.id, 4)
+        # Kunci session adalah string, jadi konversi crit.id ke string
+        criteria_weights[crit.name] = yager_data['criteria_weights'].get(str(crit.id), 4)
     
     experts = {}
     for expert_name, expert_data in yager_data['expert_ratings'].items():
@@ -1101,7 +1102,8 @@ def yager_results(project_id):
         for alt in alternatives:
             experts[expert_name][alt.name] = {}
             for crit in criteria:
-                rating = expert_data.get(alt.id, {}).get(crit.id, 4)
+                # Kunci session adalah string, jadi konversi ID ke string
+                rating = expert_data.get(str(alt.id), {}).get(str(crit.id), 4)
                 experts[expert_name][alt.name][crit.name] = rating
     
     # Jalankan analisis
